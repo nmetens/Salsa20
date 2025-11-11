@@ -40,6 +40,20 @@ def _rotl32(x: int, n: int) -> int:
     x &= 0xffffffff
     return ((x << n) | (x >> (32 - n))) & 0xffffffff
 
+def _le_bytes_to_u32(b: bytes) -> int:
+    """
+    Interpret 4 bytes as a little-endian unsigned 32-bit integer.
+    """
+    if len(b) != 4:
+        raise ValueError("need exactly 4 bytes")
+    return int.from_bytes(b, "little")
+
+
+def _u32_to_le_bytes(w: int) -> bytes:
+    """
+    Convert a 32-bit unsigned integer to 4 little-endian bytes.
+    """
+    return (w & 0xffffffff).to_bytes(4, "little")
 
 def main():
     """
@@ -82,6 +96,19 @@ def main():
     print(hex(_rotl32(0x00000001, 1)))   # Expected: 0x00000002
     print(hex(_rotl32(0x80000000, 1)))   # Expected: 0x00000001  (MSB wraps around)
     #############################################
+
+    print("#################################")
+    print("LE CONVERSION")
+    print("#################################")
+    
+    # LE conversions round-trip
+    w = 0x44434241
+    b = _u32_to_le_bytes(w)
+    print("u32_to_le_bytes(0x01234567) ->", b)                         # b'gE#\x01'
+    print("le_bytes_to_u32(..) ->", hex(_le_bytes_to_u32(b)))          # 0x1234567
+
+    #############################################
+
 
 if __name__ == "__main__":
     main()

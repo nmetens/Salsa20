@@ -116,6 +116,11 @@ def _columnround(x: list[int]) -> list[int]:
     x15,x3,x7,x11    = _quarterround(x[15], x[3],  x[7],  x[11])
     return [x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15]
 
+def _doubleround(x: list[int]) -> list[int]:
+    """
+    One Salsa20 doubleround = columnround followed by rowround.
+    """
+    return _rowround(_columnround(x))
 
 def main():
     """
@@ -188,9 +193,11 @@ def main():
 
     r = _rowround(state)
     c = _columnround(state)
+    d = _doubleround(state)
 
     print("rowround   :", [hex(v) for v in r])
     print("columnround:", [hex(v) for v in c])
+    print("doubleround:", [hex(v) for v in d])
 
 if __name__ == "__main__":
     main()

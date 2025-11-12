@@ -86,6 +86,21 @@ def _quarterround(y0: int, y1: int, y2: int, y3: int) -> tuple[int, int, int, in
     z0 = y0 ^ _rotl32((z3 + z2) & 0xffffffff, 18)
     return z0, z1, z2, z3
 
+def _rowround(y: list[int]) -> list[int]:
+    """
+    Apply the Salsa20 rowround to a 16-word state (4x4 matrix in row-major order).
+
+    Rows (by indices):
+      (0,1,2,3), (5,6,7,4), (10,11,8,9), (15,12,13,14)
+    Returns a new 16-word list.
+    """
+    assert len(y) == 16
+    y0,y1,y2,y3   = _quarterround(y[0],  y[1],  y[2],  y[3])
+    y5,y6,y7,y4   = _quarterround(y[5],  y[6],  y[7],  y[4])
+    y10,y11,y8,y9 = _quarterround(y[10], y[11], y[8],  y[9])
+    y15,y12,y13,y14 = _quarterround(y[15], y[12], y[13], y[14])
+    return [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15]
+
 def main():
     """
         Testing function.
@@ -148,6 +163,16 @@ def main():
     q_out = _quarterround(*q_in)
     print("quarterround in: ", [hex(x) for x in q_in])
     print("quarterround out:", [hex(x) for x in q_out])
+
+    print("\n#################################")
+    print("Round DEMO")
+    print("#################################")
+    state = [i for i in range(16)]
+    print("in: ", [hex(v) for v in state])
+
+    r = _rowround(state)
+
+    print("rowround   :", [hex(v) for v in r])
 
 if __name__ == "__main__":
     main()

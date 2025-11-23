@@ -68,3 +68,20 @@ def test_rotl32():
 
     assert helpers._rotl32(x, n) == 40
 
+def test_le_bytes_to_u32():
+   """
+   A byte order where the least significant byte of a 
+   multibyte data value is stored at the lowest memory address.
+   
+   Example:
+   0x12345678 is stored as 0x78_56_34_12
+   """
+   byte_string = "abfc5b2e" # Each two hex characters are 1 byte. 
+      # to little-endian: 2E5BFCAB (used: https://blockchain-academy.hs-mittweida.de/litte-big-endian-converter/)
+   b = bytes.fromhex(byte_string)
+   val1 = helpers._le_bytes_to_u32(b)
+   #BF-->191. little-endian: FB-->251
+   #used calc converter between hex and dec to get result: 
+   #https://www.rapidtables.com/convert/number/hex-to-decimal.html?x=FB
+   assert val1 == 777780395
+

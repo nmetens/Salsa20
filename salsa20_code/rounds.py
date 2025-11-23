@@ -36,10 +36,10 @@ def _quarterround(y0: int, y1: int, y2: int, y3: int) -> tuple[int, int, int, in
         tuple[int, int, int, int]: The four transformed 32-bit words
         (z0, z1, z2, z3) after applying the ARX sequence.
     """
-    z1 = y1 ^ _rotl32((y0 + y3) & 0xffffffff, 7)
-    z2 = y2 ^ _rotl32((z1 + y0) & 0xffffffff, 9)
-    z3 = y3 ^ _rotl32((z2 + z1) & 0xffffffff, 13)
-    z0 = y0 ^ _rotl32((z3 + z2) & 0xffffffff, 18)
+    z1 = y1 ^ _rotl32(_u32(y0 + y3), 7)
+    z2 = y2 ^ _rotl32(_u32(z1 + y0), 9)
+    z3 = y3 ^ _rotl32(_u32(z2 + z1), 13)
+    z0 = y0 ^ _rotl32(_u32(z3 + z2), 18)
     return z0, z1, z2, z3
 
 

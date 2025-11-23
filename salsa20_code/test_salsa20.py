@@ -1,7 +1,7 @@
 # test_salsa20.py
 # Basic Salsa20 self-tests using known test vectors from the reference paper.
 
-from salsa20 import _rowround, _columnround, _doubleround
+from .salsa20 import _rowround, _columnround, _doubleround
 
 def test_row_and_column_rounds():
     # ROWROUND example from the Salsa20 spec (y0,y4,y8,y12 = 1; others 0)

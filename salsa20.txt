@@ -1,0 +1,5 @@
+Salsa20 Notes
+By: Nathan Metens and Nick Whiteman
+
+This file contains examples and notes on the code in the salsa program.
+

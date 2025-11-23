@@ -85,3 +85,10 @@ def test_le_bytes_to_u32():
    #https://www.rapidtables.com/convert/number/hex-to-decimal.html?x=FB
    assert val1 == 777780395
 
+def test_u32_to_le_bytes():
+    w = 18537 # "Hi" in text
+    val1 = w & 0xffffffff
+    assert val1 == w
+
+    val2 = helpers._u32_to_le_bytes(w)
+    assert val2 == b"iH\x00\x00" # little endian 4 bytes 

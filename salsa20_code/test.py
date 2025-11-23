@@ -1,5 +1,8 @@
 import helpers as h
 
-bytes_ = "abfc5b2e"
-b = bytes.fromhex(bytes_)
-print(len(b))
+w = 18537
+val1 = w & 0xffffffff
+
+val1 = h._u32_to_le_bytes(w)
+val1
+print(val1)

@@ -11,6 +11,11 @@ for running tests, demos, or integrating the cipher into an application.
 
 from stream import salsa20_stream_xor
 
+# Menu options for salsa20
+ENC = 1
+DEC = 2
+QUIT = 3
+
 def main():
     """
     Simple demo for the Salsa20 stream cipher.
@@ -20,38 +25,66 @@ def main():
     - Decrypts it back
     - Prints values in a readable form
     """
+
     print("\n#################################")
     print("Salsa20 STREAM DEMO")
     print("#################################")
 
-    # Demo key/nonce (do NOT use fixed values like this in real applications)
-    key   = b"\x00" * 32
-    nonce = b"\x00" * 8
+    print_menu()
+    menu_option = get_menu_option()
 
-    # Let the user type a message, fall back to a default
-    user_msg = input("Enter a message to encrypt (blank for 'hello salsa20'): ").strip()
-    if user_msg == "":
-        user_msg = "hello salsa20"
-    msg = user_msg.encode("utf-8")
+    while menu_option != QUIT:
+        if menu_option == ENC:
+            # Demo key/nonce (do NOT use fixed values like this in real applications)
+            key   = b"\x00" * 32
+            nonce = b"\x00" * 8
 
-    print("\n[+] Key   :", key.hex())
-    print("[+] Nonce :", nonce.hex())
-    print("[+] Plain :", msg)
+            # Let the user type a message, fall back to a default
+            user_msg = input("Enter a message to encrypt (blank for 'hello salsa20'): ").strip()
+            if user_msg == "":
+                user_msg = "hello salsa20"
+            msg = user_msg.encode("utf-8")
 
-    # Encrypt
-    ct = salsa20_stream_xor(key, nonce, msg)
-    print("\n[+] Ciphertext (hex):", ct.hex())
+            print("\n[+] Key   :", key.hex())
+            print("[+] Nonce :", nonce.hex())
+            print("[+] Plain :", msg)
 
-    # Decrypt (same function, because XOR is its own inverse)
-    pt = salsa20_stream_xor(key, nonce, ct)
-    print("[+] Decrypted bytes :", pt)
-    try:
-        print("[+] Decrypted text  :", pt.decode('utf-8'))
-    except UnicodeDecodeError:
-        print("[!] Decrypted text is not valid UTF-8")
+            # Encrypt
+            ct = salsa20_stream_xor(key, nonce, msg)
+            print("\n[+] Ciphertext (hex):", ct.hex())
 
-    print("\nround-trip ok:", pt == msg)
+        if menu_option == DEC:
+            user_msg = input("Enter a ciphertext to decrypt: ").strip()
+            ct = salsa20_stream_xor(key, nonce, msg)
+            # Decrypt (same function, because XOR is its own inverse)
+            pt = salsa20_stream_xor(key, nonce, ct)
+            print("[+] Decrypted bytes :", pt)
+            try:
+                print("[+] Decrypted text  :", pt.decode('utf-8'))
+            except UnicodeDecodeError:
+                print("[!] Decrypted text is not valid UTF-8")
 
+            print("\nround-trip ok:", pt == msg)
+
+        print_menu()
+        menu_option = get_menu_option()
+
+        if menu_option == QUIT:
+            print("Thanks for testing salsa20!")
+
+def print_menu():
+    print()
+    print("1) Encrypt")
+    print("2) Decrypt")
+    print("3) Quit\n")
+
+
+def get_menu_option():
+    menu_option = int(input("Enter a menu option: "))
+    while menu_option != 1 and menu_option != 2 and menu_option != 3:
+        print("Please enter a valid menu option (1, 2, or 3)")
+        menu_option = int(input("Enter a menu option: "))
+    return menu_option
 
 if __name__ == "__main__":
     main()

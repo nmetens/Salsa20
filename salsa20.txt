@@ -3,3 +3,15 @@ By: Nathan Metens and Nick Whiteman
 
 This file contains examples and notes on the code in the salsa program.
 
+The codebase tree looks like this:
+.
+├── constants.py
+├── core.py
+├── helpers.py
+├── main.py
+├── rounds.py
+├── stream.py
+├── test_core.py
+└── test_salsa20.py
+
+

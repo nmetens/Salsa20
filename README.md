@@ -5,9 +5,11 @@ In this repo, we explore the Salsa20 stream cypher through the code. We created 
 
 We are currently working on breaking the cypher, along with creating a slidedeck to present, and the final paper, all linked below:
 
-- [![Salsa20 Demo](https://img.youtube.com/vi/TTNtp9c3vKI/maxresdefault.jpg
-)](https://www.youtube.com/watch?v=V_O0HbzIQb0)
-
 - Here is the [link to the research paper draft](https://docs.google.com/document/d/1u4q4wIdcRfqgiKfj3bpqzFaRZF3OcV3U0DjDgmZztBY/edit?tab=t.0).
 
 - Here is the [project proposal](Project_Proposal_Crypto.pdf)
+
+## Salsa20 Demo (Encrypt/Decrypt):
+[![Salsa20 Demo](https://img.youtube.com/vi/V_O0HbzIQb0/0.jpg)](https://www.youtube.com/watch?v=V_O0HbzIQb0)
+
+

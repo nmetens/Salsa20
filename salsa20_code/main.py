@@ -2,92 +2,155 @@
 main.py
 --------
 
-Example driver for the modular Salsa20 implementation.
-
-Demonstrates how to import and use the public API to encrypt/decrypt data.
-This file is not part of the library itself — it’s a practical entry point
-for running tests, demos, or integrating the cipher into an application.
+Example driver for the Salsa20 implementation with session history.
 """
 
 from stream import salsa20_stream_xor
 import secrets as s
 
-# Menu options for salsa20
 ENC = 1
 DEC = 2
 QUIT = 3
 
-def main():
-    """
-    Simple demo for the Salsa20 stream cipher.
+HISTORY: list[dict] = []  # stores all operations in this session
 
-    - Uses a fixed all-zero key and nonce (for demo only!)
-    - Encrypts a message
-    - Decrypts it back
-    - Prints values in a readable form
-    """
 
+def main() -> None:
     print("\n#################################")
     print("Salsa20 STREAM DEMO")
     print("#################################")
 
-    print_menu()
-    menu_option = get_menu_option()
-
-    while menu_option != QUIT:
-        if menu_option == ENC:
-            # Demo key/nonce (do NOT use fixed values like this in real applications)
-            # Using secrets python library for generating 
-            # cryptographically strong random numbers:
-            key   = s.token_bytes(32)
-            nonce = s.token_bytes(8)
-
-            # Let the user type a message, fall back to a default
-            user_msg = input("Enter a message to encrypt (blank for 'hello salsa20'): ").strip()
-            if user_msg == "":
-                user_msg = "hello salsa20"
-            msg = user_msg.encode("utf-8")
-
-            print("\n[+] Key   :", key.hex())
-            print("[+] Nonce :", nonce.hex())
-            print("[+] Plain :", msg)
-
-            # Encrypt
-            ct = salsa20_stream_xor(key, nonce, msg)
-            print("\n[+] Ciphertext (hex):", ct.hex())
-
-        if menu_option == DEC:
-            user_msg = input("Enter a ciphertext to decrypt: ").strip()
-            ct = salsa20_stream_xor(key, nonce, msg)
-            # Decrypt (same function, because XOR is its own inverse)
-            pt = salsa20_stream_xor(key, nonce, ct)
-            print("[+] Decrypted bytes :", pt)
-            try:
-                print("[+] Decrypted text  :", pt.decode('utf-8'))
-            except UnicodeDecodeError:
-                print("[!] Decrypted text is not valid UTF-8")
-
-            print("\nround-trip ok:", pt == msg)
-
+    while True:
         print_menu()
         menu_option = get_menu_option()
 
         if menu_option == QUIT:
-            print("Thanks for testing salsa20!")
+            print_history()
+            print("Thanks for testing Salsa20!")
+            break
 
-def print_menu():
+        if menu_option == ENC:
+            do_encrypt()
+        elif menu_option == DEC:
+            do_decrypt()
+
+
+def do_encrypt() -> None:
+    key = s.token_bytes(32)
+    nonce = s.token_bytes(8)
+
+    user_msg = input("Enter a message to encrypt (blank for 'hello salsa20'): ").strip()
+    if not user_msg:
+        user_msg = "hello salsa20"
+    msg = user_msg.encode("utf-8")
+
+    ct = salsa20_stream_xor(key, nonce, msg)
+
+    print("\n[+] Key        :", key.hex())
+    print("[+] Nonce      :", nonce.hex())
+    print("[+] Plaintext  :", msg)
+    print("[+] Ciphertext :", ct.hex())
+    print("\nSave the key, nonce, and ciphertext above if you want to decrypt later.\n")
+
+    # Log this operation
+    HISTORY.append({
+        "op": "encrypt",
+        "key": key.hex(),
+        "nonce": nonce.hex(),
+        "plaintext": user_msg,
+        "plaintext_hex": msg.hex(),
+        "ciphertext_hex": ct.hex(),
+    })
+
+
+def do_decrypt() -> None:
+    key_hex = input("Enter key (hex): ").strip()
+    nonce_hex = input("Enter nonce (hex): ").strip()
+    ct_hex = input("Enter ciphertext (hex): ").strip()
+
+    try:
+        key = bytes.fromhex(key_hex)
+        nonce = bytes.fromhex(nonce_hex)
+        ct = bytes.fromhex(ct_hex)
+    except ValueError:
+        print("[!] Invalid hex input. Please check your values.\n")
+        return
+
+    if len(key) != 32:
+        print("[!] Key must be 32 bytes (64 hex chars).\n")
+        return
+    if len(nonce) != 8:
+        print("[!] Nonce must be 8 bytes (16 hex chars).\n")
+        return
+
+    pt = salsa20_stream_xor(key, nonce, ct)
+
+    try:
+        pt_text = pt.decode("utf-8")
+        printable = True
+    except UnicodeDecodeError:
+        pt_text = None
+        printable = False
+
+    print("\n[+] Decrypted bytes (hex):", pt.hex())
+    if printable:
+        print("[+] Decrypted text      :", pt_text)
+    else:
+        print("[!] Decrypted text is not valid UTF-8")
     print()
+
+    # Log this operation
+    HISTORY.append({
+        "op": "decrypt",
+        "key": key_hex,
+        "nonce": nonce_hex,
+        "ciphertext_hex": ct_hex,
+        "plaintext_hex": pt.hex(),
+        "plaintext": pt_text if printable else None,
+    })
+
+
+def print_menu() -> None:
     print("1) Encrypt")
     print("2) Decrypt")
     print("3) Quit\n")
 
 
-def get_menu_option():
-    menu_option = int(input("Enter a menu option: "))
-    while menu_option != 1 and menu_option != 2 and menu_option != 3:
-        print("Please enter a valid menu option (1, 2, or 3)")
-        menu_option = int(input("Enter a menu option: "))
-    return menu_option
+def get_menu_option() -> int:
+    while True:
+        choice = input("Enter a menu option (1, 2, or 3): ").strip()
+        if choice in {"1", "2", "3"}:
+            return int(choice)
+        print("Please enter a valid menu option.\n")
+
+def print_history() -> None:
+    print("\n========== SESSION HISTORY ==========")
+    if not HISTORY:
+        print("No operations performed.")
+        print("=====================================\n")
+        return
+
+    for idx, entry in enumerate(HISTORY, start=1):
+        op = entry["op"]
+        print(f"\n[{idx}] Operation: {op.upper()}")
+        print(f"    Key   : {entry['key']}")
+        print(f"    Nonce : {entry['nonce']}")
+
+        if op == "encrypt":
+            print(f"    Plaintext      : {entry['plaintext']!r}")
+            print(f"    Plaintext (hex): {entry['plaintext_hex']}")
+            print(f"    Ciphertext(hex): {entry['ciphertext_hex']}")
+
+        elif op == "decrypt":
+            print(f"    Ciphertext(hex): {entry['ciphertext_hex']}")
+            print(f"    Plaintext (hex): {entry['plaintext_hex']}")
+            if entry["plaintext"] is not None:
+                print(f"    Plaintext      : {entry['plaintext']!r}")
+            else:
+                print("    Plaintext      : <non-UTF-8 bytes>")
+
+    print("\n=====================================\n")
 
 if __name__ == "__main__":
     main()
+

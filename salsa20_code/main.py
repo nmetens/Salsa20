@@ -7,6 +7,26 @@ Example driver for the Salsa20 implementation with session history.
 
 from stream import salsa20_stream_xor
 import secrets as s
+import json
+from datetime import datetime
+
+def append_history_to_file(filename="history.log") -> None:
+    """Append the current session's history to a log file as JSON entries."""
+    if not HISTORY:
+        return
+
+    # Wrap each entry with a timestamp for auditability
+    log_entries = []
+    for entry in HISTORY:
+        log_entries.append({
+            "timestamp": datetime.now().isoformat(),
+            **entry
+        })
+
+    # Append as newline-delimited JSON (NDJSON)
+    with open(filename, "a") as f:
+        for entry in log_entries:
+            f.write(json.dumps(entry) + "\n")
 
 ENC = 1
 DEC = 2
@@ -26,6 +46,8 @@ def main() -> None:
 
         if menu_option == QUIT:
             print_history()
+            append_history_to_file()     # <--- NEW
+            print("History saved to history.log")
             print("Thanks for testing Salsa20!")
             break
 

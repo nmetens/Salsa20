@@ -10,6 +10,7 @@ for running tests, demos, or integrating the cipher into an application.
 """
 
 from stream import salsa20_stream_xor
+import secrets as s
 
 # Menu options for salsa20
 ENC = 1
@@ -36,8 +37,10 @@ def main():
     while menu_option != QUIT:
         if menu_option == ENC:
             # Demo key/nonce (do NOT use fixed values like this in real applications)
-            key   = b"\x00" * 32
-            nonce = b"\x00" * 8
+            # Using secrets python library for generating 
+            # cryptographically strong random numbers:
+            key   = s.token_bytes(32)
+            nonce = s.token_bytes(8)
 
             # Let the user type a message, fall back to a default
             user_msg = input("Enter a message to encrypt (blank for 'hello salsa20'): ").strip()

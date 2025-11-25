@@ -1,0 +1,1 @@
+https://docs.python.org/3/library/secrets.html (secrets: The secrets module is used for generating cryptographically strong random numbers suitable for managing data such as passwords, account authentication, security tokens, and related secrets.)

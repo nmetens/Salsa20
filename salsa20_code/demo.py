@@ -89,6 +89,7 @@ def salsa20_stream_xor(key32, nonce8, data, initial_block=0):
     block = initial_block
     i = 0
     while i < len(data):
+        breakpoint()
         ks = salsa20_block(key32, nonce8, block)
         take = min(64, len(data) - i)
         for j in range(take):

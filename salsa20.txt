@@ -14,4 +14,35 @@ The codebase tree looks like this:
 ├── test_core.py
 └── test_salsa20.py
 
+The meat of the cipher begins with this block of code:
+
+def salsa20_stream_xor(key32, nonce8, data, initial_block=0): 
+    out = bytearray(len(data)) 
+    block = initial_block 
+    i = 0 
+    while i < len(data): 
+        ks = salsa20_block(key32, nonce8, block) 
+        take = min(64, len(data) - i) 
+        for j in range(take): 
+            out[i + j] = data[i + j] ^ ks[j]  #XOR: ^
+        i += take 
+        block += 1 
+    return bytes(out)
+
+The variables inside this function include ks (key stream), take, out (output ciphertext), data (the message
+to encrypt), and a few counters.
+
+ks is the 64-byte Salsa20 keystream block generated from:
+    - the 32-byte key
+    - the 8-byte nonce
+    - the current block counter
+The bytes in the keystream are meant to be pseudorandom.
+
+To encrypt: ciphertext = plaintext XOR keystream
+To decrypt: plaintext = ciphertext XOR keystream
+
+The main operation for the cipher is ARX design 
+ - A: 32-bit addition
+ - R: Bitwise rotation
+ - X: XOR addition
 

@@ -71,20 +71,28 @@ def format_state_matrix(words) -> str:
         )
     return "\n".join(lines)
 
-def trace_salsa20_rounds(state_words: list[int], path: str = "salsa20_rounds.txt") -> None:
+import json
+
+def trace_salsa20_rounds(state_words, path="salsa20_trace.txt"):
     """
-    Write the state after each doubleround to a text file, in 4x4 matrix form.
-    Does NOT do feed-forward; purely the 20-round core trace.
+    Write the initial state AND each doubleround state to a file.
+    The first line is a JSON header containing the initial state.
     """
-    state = state_words[:]  # working copy
+    state = state_words[:]
 
     with open(path, "w", encoding="utf-8") as f:
-        # Initial state
+
+        # --- NEW: Save initial state as JSON header ---
+        header = {"initial_state": state_words}
+        f.write(json.dumps(header) + "\n")
+        f.write("\n")  # spacing
+
+        # Initial matrix display
         f.write("Initial state (round 0):\n")
         f.write(format_state_matrix(state))
         f.write("\n\n")
 
-        # 10 doublerounds = 20 rounds
+        # Doublerounds
         for dr in range(10):
             state = _doubleround(state)
             f.write(f"After doubleround {dr+1} (round {2*(dr+1)}):\n")

@@ -12,18 +12,21 @@ import secrets as s
 import json
 from datetime import datetime
 
-import json
+def fmt_char(b: int) -> str:
+    """Return printable ASCII char, or \\xNN for non-printable bytes."""
+    if 32 <= b < 127:
+        return chr(b)
+    return f"\\x{b:02x}"
+
 
 def show_xor_with_final_block(plaintext: bytes, keystream: bytes) -> bytes:
     """
-    Demonstrate the final XOR step:
-      ciphertext = plaintext XOR keystream_block
-
-    Returns the ciphertext and prints a small table.
+    Pretty XOR visualization for teaching.
+    Shows printable ASCII or \\xNN for all bytes.
     Only uses the first len(plaintext) bytes of the keystream.
     """
     if len(keystream) < len(plaintext):
-        raise ValueError("Keystream block must be >= plaintext length")
+        raise ValueError("Keystream block must be at least as long as plaintext")
 
     ciphertext = bytes(p ^ k for p, k in zip(plaintext, keystream))
 
@@ -40,20 +43,22 @@ def show_xor_with_final_block(plaintext: bytes, keystream: bytes) -> bytes:
         k_ch = fmt_char(k)
         c_ch = fmt_char(c)
 
-        print(f"{i:3d}  {p_hex:<8} {k_hex:<9} {c_hex:<10} |  {p_ch:<3}⊕ {k_ch:<4}= {c_ch}")
+        print(f"{i:3d} {p_hex:>6} {k_hex:>5} {c_hex:>7}  | {p_ch:>2} ⊕ {k_ch:<4}= {c_ch}")
 
-
-    print("\nPlaintext : ", plaintext)
-    print("Keystream : ", keystream_block.hex())
-    print("Ciphertext:", ct.hex())
+    print("\nPlaintext :", plaintext)
+    print("Keystream :", keystream.hex())
+    print("Ciphertext:", ciphertext.hex())
     print("=== END XOR DEMO ===\n")
 
-    return ct
+    return ciphertext
 
-def view_trace_file(pt: bytes, path="salsa20_trace.txt"):
+def view_trace_file(pt: bytes, path: str = "salsa20_trace.txt"):
     """
-    Display the trace AND compute the final 20-round core
-    using the initial state stored in the file’s header.
+    Display the Salsa20 round trace stored in 'path', then:
+      - recompute the 20-round core state
+      - compute the final keystream block via feed-forward
+      - show plaintext ⊕ keystream = ciphertext using `pt`
+    `pt` must be the plaintext bytes you want to demo.
     """
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -64,7 +69,7 @@ def view_trace_file(pt: bytes, path="salsa20_trace.txt"):
 
     print("\n=== SALSA20 ROUND TRACE ===\n")
 
-    # 1. Extract initial state from JSON header
+    # 1) First line: JSON header with initial_state
     try:
         header = json.loads(lines[0].strip())
         initial_state = header["initial_state"]
@@ -72,13 +77,13 @@ def view_trace_file(pt: bytes, path="salsa20_trace.txt"):
         print("[!] Could not parse initial state from trace file.")
         return
 
-    # 2. Print everything else (the round matrices)
+    # 2) Print the rest (the matrices and text written by trace_salsa20_rounds)
     for line in lines[1:]:
         print(line.rstrip())
 
     print("\n=== END OF TRACE ===\n")
 
-    # 3. Compute final core state from initial_state
+    # 3) Recompute 20-round core state via 10 doublerounds
     w = initial_state[:]
     for _ in range(10):
         w = _doubleround(w)
@@ -91,7 +96,7 @@ def view_trace_file(pt: bytes, path="salsa20_trace.txt"):
     print("\nBytes (LE):", core_bytes.hex())
     print_state_matrix(core_words, "4×4 Core Matrix (20 rounds, no feed-forward)")
 
-    # --- NEW: feed-forward with original state (x) to get final block ---
+    # 4) Feed-forward with initial_state to get final Salsa20 block
     out_words = [
         (core_words[i] + initial_state[i]) & 0xffffffff
         for i in range(16)
@@ -103,15 +108,14 @@ def view_trace_file(pt: bytes, path="salsa20_trace.txt"):
     print("\nBytes (LE):", out_bytes.hex())
     print_state_matrix(out_words, "4×4 Final Block Matrix (keystream block)")
 
-    try:
-        # e.g., last encrypt operation
-        last_entry = next(e for e in reversed(HISTORY) if e.get("op") == "encrypt")
-        #pt = last_entry["plaintext"].encode("utf-8")
-        show_xor_with_final_block(pt, out_bytes)
-    except Exception:
-        print("\n[!] No plaintext available in HISTORY to demo XOR.\n")
-
     print("\n=== END ===\n")
+
+    # 5) XOR demo: plaintext ⊕ keystream = ciphertext
+    # out_bytes is 64 bytes, so pt must be <= 64 bytes
+    if len(pt) > len(out_bytes):
+        print(f"[!] Warning: plaintext longer than one block ({len(pt)} > 64).")
+        print("    Only the first 64 bytes will be shown in the XOR demo.\n")
+    show_xor_with_final_block(pt, out_bytes)
 
 def print_state_matrix(words, title="State Matrix"):
     print(f"\n{title}:")
@@ -193,8 +197,15 @@ def main() -> None:
         elif menu_option == VIEW_HISTORY:
             pretty_print_history()
 
+        #elif menu_option == VIEW_ROUNDS:
+        #    view_trace_file(demo_plaintext=pt)
+
         elif menu_option == VIEW_ROUNDS:
-            view_trace_file(demo_plaintext=pt)
+            if HISTORY and "plaintext" in HISTORY[-1]:
+                pt = HISTORY[-1]["plaintext"].encode("utf-8")
+                view_trace_file(pt)
+            else:
+                print("[!] No plaintext available for XOR demo.")
 
         elif menu_option == QUIT:
             print_history()

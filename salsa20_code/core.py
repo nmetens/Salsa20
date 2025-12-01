@@ -54,6 +54,12 @@ def _initial_state_256(key32: bytes, nonce8: bytes, counter64: int) -> list[int]
         _le_bytes_to_u32(c[12:16]),
     ]
 
+def print_state_matrix(words, title="State Matrix"):
+    print(f"\n{title}:")
+    for r in range(4):
+        row = words[4*r : 4*r + 4]
+        print("  " + "  ".join(f"{v:08x}" for v in row))
+
 def _salsa20_hash(state_words: list[int]) -> bytes:
     """
     Apply the Salsa20/20 core hash function to a 16-word state
@@ -74,6 +80,20 @@ def _salsa20_hash(state_words: list[int]) -> bytes:
     # Perform 20 rounds (10 double-rounds)
     for _ in range(10):
         w = _doubleround(w)
+
+    # --- DEBUG VIEW: core state before feed-forward ---
+    core_words = w[:]  # 16 mixed words
+    core_bytes = b"".join(_u32_to_le_bytes(v) for v in core_words)
+
+    print("\nCore state after 20 rounds (before feed-forward):")
+    print("  words:", [hex(v) for v in core_words])
+    print("  bytes (little-endian):", core_bytes.hex())
+
+    core_words = w[:]  # after 20 rounds
+    core_bytes = b"".join(_u32_to_le_bytes(v) for v in core_words)
+
+    print_state_matrix(core_words, "Core state after 20 rounds (before feed-forward)")
+    # -----------------------------------------------
 
     # Feed-forward addition: (w + x) mod 2^32
     out = [(w[i] + x[i]) & 0xffffffff for i in range(16)]

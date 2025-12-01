@@ -60,6 +60,37 @@ def print_state_matrix(words, title="State Matrix"):
         row = words[4*r : 4*r + 4]
         print("  " + "  ".join(f"{v:08x}" for v in row))
 
+def format_state_matrix(words) -> str:
+    """Return a pretty 4x4 hex matrix as a multiline string."""
+    lines = []
+    lines.append("      c0        c1        c2        c3")
+    for r in range(4):
+        row = words[4*r : 4*r + 4]
+        lines.append(
+            f"r{r}   " + "  ".join(f"{v:08x}" for v in row)
+        )
+    return "\n".join(lines)
+
+def trace_salsa20_rounds(state_words: list[int], path: str = "salsa20_rounds.txt") -> None:
+    """
+    Write the state after each doubleround to a text file, in 4x4 matrix form.
+    Does NOT do feed-forward; purely the 20-round core trace.
+    """
+    state = state_words[:]  # working copy
+
+    with open(path, "w", encoding="utf-8") as f:
+        # Initial state
+        f.write("Initial state (round 0):\n")
+        f.write(format_state_matrix(state))
+        f.write("\n\n")
+
+        # 10 doublerounds = 20 rounds
+        for dr in range(10):
+            state = _doubleround(state)
+            f.write(f"After doubleround {dr+1} (round {2*(dr+1)}):\n")
+            f.write(format_state_matrix(state))
+            f.write("\n\n")
+
 def _salsa20_hash(state_words: list[int]) -> bytes:
     """
     Apply the Salsa20/20 core hash function to a 16-word state
@@ -82,6 +113,7 @@ def _salsa20_hash(state_words: list[int]) -> bytes:
         w = _doubleround(w)
 
     # --- DEBUG VIEW: core state before feed-forward ---
+    """
     core_words = w[:]  # 16 mixed words
     core_bytes = b"".join(_u32_to_le_bytes(v) for v in core_words)
 
@@ -93,6 +125,7 @@ def _salsa20_hash(state_words: list[int]) -> bytes:
     core_bytes = b"".join(_u32_to_le_bytes(v) for v in core_words)
 
     print_state_matrix(core_words, "Core state after 20 rounds (before feed-forward)")
+    """
     # -----------------------------------------------
 
     # Feed-forward addition: (w + x) mod 2^32
@@ -104,4 +137,5 @@ def _salsa20_hash(state_words: list[int]) -> bytes:
 # --- 3) One keystream block (64 bytes) ---
 def salsa20_block(key32: bytes, nonce8: bytes, counter64: int) -> bytes:
     state = _initial_state_256(key32, nonce8, counter64)
+    trace_salsa20_rounds(state, "salsa20_trace.txt") # Show all rounds in a separate file
     return _salsa20_hash(state)

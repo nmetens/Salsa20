@@ -1,0 +1,77 @@
+Initial state (round 0):
+      c0        c1        c2        c3
+r0   61707865  da76bec1  c4448302  6438dc11
+r1   43d43302  3320646e  1a6634a6  b9b1b424
+r2   00000000  00000000  79622d32  deb8bf71
+r3   de5c6e32  9afb4565  9dda33ad  6b206574
+
+After doubleround 1 (round 2):
+      c0        c1        c2        c3
+r0   04d8bfd4  fd23d917  eff16ee4  2055d317
+r1   76be3c63  e4bddd0a  3c59ae20  eb9ceaaa
+r2   e447c225  fa69e966  ad037f83  12b9cd9e
+r3   2ff39fd1  7366aa2f  30aacb8f  fd2b0577
+
+After doubleround 2 (round 4):
+      c0        c1        c2        c3
+r0   8c42473a  8b8f517e  dea358ff  8773f4d6
+r1   a62d0774  bb17c7f2  bfb9bc18  8cb3f9cf
+r2   ebae3e33  aaeb5f3c  a178cfff  49a6c49a
+r3   42d666ba  5967a935  5fc1e9fc  53498bc1
+
+After doubleround 3 (round 6):
+      c0        c1        c2        c3
+r0   f04f8a38  03c5adcb  b2f8ed20  2c06afcf
+r1   efd17976  9583c875  cac41f88  586a0dcc
+r2   bbd664ab  77073001  afc8a173  fd1e0e5b
+r3   e2cbf9c7  ff44193d  c4e77e0e  904fd5ac
+
+After doubleround 4 (round 8):
+      c0        c1        c2        c3
+r0   2fc9c3c7  b1609b30  d8db9ea6  1dce7d4e
+r1   02b4dd77  d4dc1e2a  9e97cd7e  40ab37a4
+r2   868f4948  ed34848c  b3d5de4a  1f7aaafc
+r3   df936926  76f58ed5  9c786962  5d3bdb54
+
+After doubleround 5 (round 10):
+      c0        c1        c2        c3
+r0   07707981  945693e0  87c38e56  02cb96f3
+r1   3989e080  8b2dbc7a  09a5f82d  51deb52d
+r2   3a81d207  56ddb152  fca1482b  8a6b5ba5
+r3   bb1d0afd  24331330  a96836a1  58972fd7
+
+After doubleround 6 (round 12):
+      c0        c1        c2        c3
+r0   ae85b424  57e845de  835e4fb7  513c93ea
+r1   c2b74e9b  653b946a  c2976c85  c93e835f
+r2   dec2bc42  78185102  2d0096c5  8c3cab2c
+r3   dc0f2765  17d460f1  fbc2c4de  7397ca55
+
+After doubleround 7 (round 14):
+      c0        c1        c2        c3
+r0   229dc40d  b13496f7  8cb0341b  226414a9
+r1   9f9c8731  1f32c0d0  e65dbd47  851afce9
+r2   21820d7b  4b147be3  725d2717  547b098d
+r3   e27777fb  35175964  ede88358  d1d87ba0
+
+After doubleround 8 (round 16):
+      c0        c1        c2        c3
+r0   3aaee394  c49c6458  e25a095e  c61056e4
+r1   497ea9b1  0ea5414c  c9cf432f  8a43a0b2
+r2   f153a13a  0cd33a8c  9b7bd5f0  22e8022b
+r3   59b3db7e  4829f228  092e784f  71c5a971
+
+After doubleround 9 (round 18):
+      c0        c1        c2        c3
+r0   d0e4e654  b1b731f3  937f4a1a  5f443008
+r1   97c5d9e9  9ebe99e1  9be2b19e  2cb4cd89
+r2   22b88491  c0322803  30ec9fba  e47add0d
+r3   b0499cdb  93f3a76c  042a1f7a  731b4a37
+
+After doubleround 10 (round 20):
+      c0        c1        c2        c3
+r0   f0d496d9  a7a90601  76ffd832  8f91f1f6
+r1   a3ab535e  727f500d  9cdf4eb0  4eddcac8
+r2   0bbef5aa  963e4b82  0fc3c256  418c71a2
+r3   b6b0b33a  6600bd8b  4d9a108a  0bed3c2c
+

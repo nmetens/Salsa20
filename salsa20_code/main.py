@@ -10,27 +10,55 @@ import secrets as s
 import json
 from datetime import datetime
 
+import json
+
+def pretty_print_history(path="history.log"):
+    print("\n=== SALSA20 HISTORY LOG ===\n")
+
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                print(f"[!] Skipping invalid JSON: {line}")
+                continue
+
+            print("Timestamp  : ", record.get("timestamp"))
+            print("Operation  : ", record.get("op"))
+            print("Key        : ", record.get("key"))
+            print("Nonce      : ", record.get("nonce"))
+
+            if record.get("op") == "encrypt":
+                print("Plaintext  : ", record.get("plaintext"))
+                print("Plain(hex) : ", record.get("plaintext_hex"))
+                print("Cipher(hex):", record.get("ciphertext_hex"))
+
+            if record.get("op") == "decrypt":
+                print("Cipher(hex):", record.get("ciphertext_hex"))
+                print("Plain(hex) :", record.get("plaintext_hex"))
+                print("Plaintext  :", record.get("plaintext"))
+
+            print("-" * 60)
+
+    print("\n=== END OF LOG ===\n")
+
 def append_history_to_file(filename="history.log") -> None:
-    """Append the current session's history to a log file as JSON entries."""
+    """Dump HISTORY entries to a file without modifying them."""
     if not HISTORY:
         return
 
-    # Wrap each entry with a timestamp for auditability
-    log_entries = []
-    for entry in HISTORY:
-        log_entries.append({
-            "timestamp": datetime.now().isoformat(),
-            **entry
-        })
-
-    # Append as newline-delimited JSON (NDJSON)
-    with open(filename, "a") as f:
-        for entry in log_entries:
+    with open(filename, "a", encoding="utf-8") as f:
+        for entry in HISTORY:
             f.write(json.dumps(entry) + "\n")
 
 ENC = 1
 DEC = 2
-QUIT = 3
+VIEW_HISTORY = 3
+QUIT = 4
 
 HISTORY: list[dict] = []  # stores all operations in this session
 
@@ -44,18 +72,23 @@ def main() -> None:
         print_menu()
         menu_option = get_menu_option()
 
-        if menu_option == QUIT:
+        if menu_option == ENC:
+            do_encrypt()
+            append_history_to_file()
+
+        elif menu_option == DEC:
+            do_decrypt()
+            append_history_to_file()
+
+        elif menu_option == VIEW_HISTORY:
+            pretty_print_history()
+
+        elif menu_option == QUIT:
             print_history()
-            append_history_to_file()     # <--- NEW
+            append_history_to_file()
             print("History saved to history.log")
             print("Thanks for testing Salsa20!")
             break
-
-        if menu_option == ENC:
-            do_encrypt()
-        elif menu_option == DEC:
-            do_decrypt()
-
 
 def do_encrypt() -> None:
     key = s.token_bytes(32)
@@ -76,6 +109,7 @@ def do_encrypt() -> None:
 
     # Log this operation
     HISTORY.append({
+        "timestamp": datetime.now().isoformat(),
         "op": "encrypt",
         "key": key.hex(),
         "nonce": nonce.hex(),
@@ -83,7 +117,6 @@ def do_encrypt() -> None:
         "plaintext_hex": msg.hex(),
         "ciphertext_hex": ct.hex(),
     })
-
 
 def do_decrypt() -> None:
     key_hex = input("Enter key (hex): ").strip()
@@ -123,6 +156,7 @@ def do_decrypt() -> None:
 
     # Log this operation
     HISTORY.append({
+        "timestamp": datetime.now().isoformat(),
         "op": "decrypt",
         "key": key_hex,
         "nonce": nonce_hex,
@@ -131,17 +165,16 @@ def do_decrypt() -> None:
         "plaintext": pt_text if printable else None,
     })
 
-
 def print_menu() -> None:
     print("1) Encrypt")
     print("2) Decrypt")
-    print("3) Quit\n")
-
+    print("3) Print History")
+    print("4) Quit\n")
 
 def get_menu_option() -> int:
     while True:
-        choice = input("Enter a menu option (1, 2, or 3): ").strip()
-        if choice in {"1", "2", "3"}:
+        choice = input("Enter a menu option (1, 2, 3, or 4): ").strip()
+        if choice in {"1", "2", "3", "4"}:
             return int(choice)
         print("Please enter a valid menu option.\n")
 

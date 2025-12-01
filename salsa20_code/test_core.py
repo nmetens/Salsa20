@@ -128,16 +128,16 @@ def test_stream_handles_empty_and_single_byte():
     assert salsa20_stream_xor(key, nonce, b"") == b""
     assert salsa20_stream_xor(key, nonce, b"x") == salsa20_stream_xor(key, nonce, b"x")
 
-# ---------- 5) Optional regression: first block known hex (freeze test) ----------
-# If you want a stable regression check for your implementation, you can
-# generate once and pin it here. Uncomment after you validate with spec vectors.
+    # ---------- 5) Optional regression: first block known hex (freeze test) ----------
+    # If you want a stable regression check for your implementation, you can
+    # generate once and pin it here. Uncomment after you validate with spec vectors.
 
-# def test_block_regression_known_vector():
-#     key   = bytes(range(32))
-#     nonce = b"\x00"*8
-#     block0 = salsa20_block(key, nonce, 0)
-#     assert block0.hex() == "<paste-expected-128-hex-chars-here>"
-"""
+    # def test_block_regression_known_vector():
+    #     key   = bytes(range(32))
+    #     nonce = b"\x00"*8
+    #     block0 = salsa20_block(key, nonce, 0)
+    #     assert block0.hex() == "<paste-expected-128-hex-chars-here>"
+    """
         Testing function.
     """
 
@@ -212,5 +212,3 @@ def test_stream_handles_empty_and_single_byte():
     print("rowround   :", [hex(v) for v in r])
     print("columnround:", [hex(v) for v in c])
     print("doubleround:", [hex(v) for v in d])
-
-

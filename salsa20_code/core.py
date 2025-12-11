@@ -73,7 +73,7 @@ def format_state_matrix(words) -> str:
 
 import json
 
-def trace_salsa20_rounds(state_words, path="salsa20_trace.txt"):
+def trace_salsa20_rounds(state_words, path="logs/salsa20_trace.txt"):
     """
     Write the initial state AND each doubleround state to a file.
     The first line is a JSON header containing the initial state.
@@ -120,22 +120,6 @@ def _salsa20_hash(state_words: list[int]) -> bytes:
     for _ in range(10):
         w = _doubleround(w)
 
-    # --- DEBUG VIEW: core state before feed-forward ---
-    """
-    core_words = w[:]  # 16 mixed words
-    core_bytes = b"".join(_u32_to_le_bytes(v) for v in core_words)
-
-    print("\nCore state after 20 rounds (before feed-forward):")
-    print("  words:", [hex(v) for v in core_words])
-    print("  bytes (little-endian):", core_bytes.hex())
-
-    core_words = w[:]  # after 20 rounds
-    core_bytes = b"".join(_u32_to_le_bytes(v) for v in core_words)
-
-    print_state_matrix(core_words, "Core state after 20 rounds (before feed-forward)")
-    """
-    # -----------------------------------------------
-
     # Feed-forward addition: (w + x) mod 2^32
     out = [(w[i] + x[i]) & 0xffffffff for i in range(16)]
 
@@ -145,5 +129,5 @@ def _salsa20_hash(state_words: list[int]) -> bytes:
 # --- 3) One keystream block (64 bytes) ---
 def salsa20_block(key32: bytes, nonce8: bytes, counter64: int) -> bytes:
     state = _initial_state_256(key32, nonce8, counter64)
-    trace_salsa20_rounds(state, "salsa20_trace.txt") # Show all rounds in a separate file
+    trace_salsa20_rounds(state, "logs/salsa20_trace.txt") # Show all rounds in a separate file
     return _salsa20_hash(state)

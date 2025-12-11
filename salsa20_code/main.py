@@ -52,7 +52,7 @@ def show_xor_with_final_block(plaintext: bytes, keystream: bytes) -> bytes:
 
     return ciphertext
 
-def view_trace_file(pt: bytes, path: str = "salsa20_trace.txt"):
+def view_trace_file(pt: bytes, path: str = "logs/salsa20_trace.txt"):
     """
     Display the Salsa20 round trace stored in 'path', then:
       - recompute the 20-round core state
@@ -123,7 +123,7 @@ def print_state_matrix(words, title="State Matrix"):
         row = words[4*r : 4*r + 4]
         print("  " + "  ".join(f"{v:08x}" for v in row))
 
-def pretty_print_history(path="history.log"):
+def pretty_print_history(path="logs/history.log"):
     print("\n=== SALSA20 HISTORY LOG ===\n")
 
     with open(path, "r", encoding="utf-8") as f:
@@ -157,7 +157,7 @@ def pretty_print_history(path="history.log"):
 
     print("\n=== END OF LOG ===\n")
 
-def append_history_to_file(filename="history.log") -> None:
+def append_history_to_file(filename="logs/history.log") -> None:
     """Dump HISTORY entries to a file without modifying them."""
     if not HISTORY:
         return
